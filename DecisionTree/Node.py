@@ -1,3 +1,6 @@
+import numpy as np
+import random
+
 class Node:
     def __init__(self, attribute_index = -1, attribute_name = None, label = "into node"):
         self.nodes = []
@@ -19,7 +22,7 @@ class Node:
             if example[self.attribute_index] == node.attribute_name:
                 return node.get_prediction(example)
         
-        # # Get majority vote if base cases don't work.
+        # Get majority vote if base cases don't work.
         # votes = {}
         # votes = self.get_majority(votes)
         # votes = sorted(votes.items(), key=lambda x: x[1], reverse = True)
@@ -41,7 +44,7 @@ class Node:
             if node.attribute_index == -1:
                 return node.label
     
-        # returns the largest label vote.
+    # returns the largest label vote.
     def get_majority(self, votes_dict):
         for node in self.nodes:
             if node.attribute_index == -1:

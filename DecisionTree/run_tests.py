@@ -22,7 +22,7 @@ def get_accuracy_from_tree(tree, test_filepath, label_pos_idx):
         if example[label_pos_idx] == pred:
             num_correct += 1
 
-    print("accuracy: ", num_correct / test_ex_tot)
+    return num_correct / test_ex_tot
 
 def create_prediction_file(tree, test_filepath, label_pos_idx, filename, id_label, pred_label):
     
@@ -43,35 +43,47 @@ def create_prediction_file(tree, test_filepath, label_pos_idx, filename, id_labe
 
     submission.to_csv(filename + '.csv', index=False)
 
+def run_full_tree_test(training_filepath, test_filepath, label_pos_idx, max_depth, fix_tree = False, fix_label = None):
+    info_split_types = ['E', 'G', 'M']
+    
+    for split_type in info_split_types:
+        average_train_err = 0
+        average_test_err = 0
+        count = 0
+        for depth in range(1, max_depth + 1):
+            tree = Tree(training_filepath, label_pos_idx, split_type, depth, fix_tree, fix_label) 
+            train_err = 1 - get_accuracy_from_tree(tree, training_filepath, label_pos_idx)
+            test_err = 1 - get_accuracy_from_tree(tree, test_filepath, label_pos_idx)
+            print("Type of split: ", split_type, "Depth: ", depth, "Train error: ", train_err, "Test error: ", test_err)
+            average_train_err += train_err
+            average_test_err += test_err
+            count += 1
+        average_train_err /= count
+        average_test_err /= count
+        print("Type of split: ", split_type, "Average_train err: ", average_train_err, "Average test err: ", average_test_err)
+
+# # Car simulation.
+filename = "submission_test"
+training_filepath = "C:/Users/keato/OneDrive/Documents/CS5350/DecisionTree/car/train.csv"
+test_filepath = "C:/Users/keato/OneDrive/Documents/CS5350/DecisionTree/car/test.csv"
+label_pos_idx = 6
+print("Car data: ")
+run_full_tree_test(training_filepath, test_filepath, label_pos_idx, 6)
+
 
 filename = "submission_test"
-training_filepath_1 = "C:/Users/keato/OneDrive/Documents/CS5350/DecisionTree/bank/train.csv"
-test_filepath_1 = "C:/Users/keato/OneDrive/Documents/CS5350/DecisionTree/bank/test.csv"
-label_pos_idx_1 = 15
-id_label = 'id'
-pred_label = 'quality'
-tree = Tree(training_filepath_1, label_pos_idx_1, 'E', 3)
-create_prediction_file(tree, test_filepath_1, label_pos_idx_1, filename, id_label, pred_label)
-get_accuracy_from_tree(tree, test_filepath_1, label_pos_idx_1)
+training_filepath = "C:/Users/keato/OneDrive/Documents/CS5350/DecisionTree/bank/train.csv"
+test_filepath = "C:/Users/keato/OneDrive/Documents/CS5350/DecisionTree/bank/test.csv"
+label_pos_idx = 16
+print("Bank data using unknown as an attribute: ")
+run_full_tree_test(training_filepath, test_filepath, label_pos_idx, 16)
 
-# Car simulation.
-# filename = "submission_test"
-# training_filepath_1 = "C:/Users/keato/OneDrive/Documents/CS5350/DecisionTree/car/train.csv"
-# test_filepath_1 = "C:/Users/keato/OneDrive/Documents/CS5350/DecisionTree/car/test.csv"
-# label_pos_idx_1 = 6
-# id_label = 'id'
-# pred_label = 'quality'
-# tree = Tree(training_filepath_1, label_pos_idx_1, 'E')
-# create_prediction_file(tree, test_filepath_1, label_pos_idx_1, filename, id_label, pred_label)
-# get_accuracy_from_tree(tree, test_filepath_1, label_pos_idx_1)
+filename = "submission_test"
+training_filepath = "C:/Users/keato/OneDrive/Documents/CS5350/DecisionTree/bank/train.csv"
+test_filepath = "C:/Users/keato/OneDrive/Documents/CS5350/DecisionTree/bank/test.csv"
+label_pos_idx = 16
+print("Bank data using majority instead of unknown")
+run_full_tree_test(training_filepath, test_filepath, label_pos_idx, 16, True, "unknown")
 
-   
-# filename = "submission_1"
-# training_filepath = "G:/Main/School/College/UniversityOfUtah/FinalPush/MachineLearning/income-level-prediction-2021s/train_final.csv"
-# test_filepath = "G:/Main/School/College/UniversityOfUtah/FinalPush/MachineLearning/income-level-prediction-2021s/test_final.csv"
-# label_pos_idx = 14
-# id_label = 'id'
-# pred_label = 'Prediction'
 
-# tree = Tree(training_filepath, label_pos_idx)
-# create_prediction_file(tree, test_filepath, label_pos_idx, filename, id_label, pred_label)
+

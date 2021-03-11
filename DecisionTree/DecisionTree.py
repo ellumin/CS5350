@@ -2,13 +2,11 @@ import math
 import numpy as np
 from Node import Node
 import pandas as pd
-import random
-
 
 
 class DecisionTree():
 
-    def __init__(self, training_filepath, label_pos_idx, split_opt = 'E', depth = 10):
+    def __init__(self, training_filepath, label_pos_idx, split_opt = 'E', depth = 10, fix_tree = False, fix_label = None):
 
         # Load training and test files.
         self.df = self.load_file(training_filepath)
@@ -17,12 +15,19 @@ class DecisionTree():
         # Set the max depth.
         self.max_depth = depth
 
+        # Fix the data with majority labels.
+        if fix_label:
+            self.UpdateEmptyDataMajority(fix_label)
+
         # Get the data to feed into the tree.
         num_features_idx, unique_feat, labels = self.count_unique_features()
         
-        # Store features and examples to give to 
+        self.features_idx = unique_feat
+
+        # Store features and examples to give to ID3 algorthm.
         self.attributes = list(range(0, len(num_features_idx)))
         self.examples = list(range(0, len(self.df.index)))
+        
 
         # Store the method used to split the data.
         if split_opt == 'E':
@@ -138,6 +143,32 @@ class DecisionTree():
     def get_prediction(self, example):
         return self.tree.get_prediction(example)
 
+    # Update all labels matching the null datatype with
+    # majority category label of that column.
+    def UpdateEmptyDataMajority(self, fix_label):
+       
+        # Iterate through each of the columns.
+        for index in range(self.df.shape[1]):
+            if index != self.label_pos_idx:
+        
+                # print("col: ", col)
+                # print("type self df: ", type(selfcl.df))
+                col = self.df.iloc[:, index]
+                categories = col.unique()
+                val_counts = col.value_counts()
+                
+                max_label = None
+                num_max_cat = 0
+             
+                # Get the category with the majority. 
+                for category in categories:
+                    if category != fix_label and val_counts[category] > num_max_cat:
+                        max_label = category 
+               
+                matching = col==fix_label
+
+               
+                self.df.iloc[:,index].mask(matching, max_label, inplace=True)           
 
     def entropy_inf_gain(self, S, attribute):
         # DFs containing column matching sent attribute and label col respectively.
